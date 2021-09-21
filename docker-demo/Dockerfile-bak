@@ -1,0 +1,7 @@
+FROM mcr.microsoft.com/dotnet/aspnet:3.1
+WORKDIR /app
+COPY . /app
+ENV ASPNETCORE_URLS http://*:8881
+ENV ASPNETCORE_ENVIRONMENT Production
+EXPOSE 8881
+ENTRYPOINT /app/docker-netcore.start.sh
