@@ -1,0 +1,38 @@
+version: '2.2'
+services:
+  docker-mysql-service:
+    container_name: docker-mysql
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+    volumes:
+      - ./mysql:/var/lib/mysql
+
+  docker-netcore-service:
+    container_name: docker-netcore
+    build: .
+    working_dir: /app
+    depends_on:
+      - docker-mysql-service
+    links:
+      - docker-mysql-service
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:8881
+      - ASPNETCORE_ENVIRONMENT='Production'
+    image: mcr.microsoft.com/dotnet/aspnet:3.1
+    ports:
+      - "127.0.0.1:8881:8881"
+    volumes:
+      - ~/test/docker-demo/docker-demo:/app
+      - /etc/localtime:/etc/localtime
+    entrypoint: /app/docker-netcore.start.sh
+  
+  reverse-proxy-service:
+    container_name: docker-nginx
+    image: nginx
+    depends_on:
+      - docker-netcore-service
+    ports:
+      - "5050:8080"
+    volumes:
+      - ./proxy.conf:/etc/nginx/conf.d/default.conf
